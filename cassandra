@@ -1,0 +1,84 @@
+#!/bin/bash
+# author : Tarık Yılmaz
+# 2013
+
+
+if [ $(whoami) != "root" ]; then
+    echo "Cassandra bash script works only with root user"
+    exit 1
+fi
+
+CASSANDRADIR=/usr/share/cassandra/bin
+PIDFILE=/var/run/cassandra.pid
+LOGFILE=/var/log/cassandra/output_script.log
+USER=cassandra
+_BOLD=`tput bold`
+_NORMAL=`tput sgr0`
+PARAMS="-p ${PIDFILE}"
+
+writelog(){
+	echo "`date` : $1" >> "$LOG"
+}
+
+log_clear(){
+	echo "`date` - cleared" > $LOG
+}
+
+start(){
+	if [ ! -f ${PIDFILE} ];
+	then
+		echo "Starting ${_BOLD}Apache cassandra${_NORMAL} ..."
+		start-stop-daemon --start \
+			--user ${USER} \
+			--pidfile ${PIDFILE} \
+			--exec ${CASSANDRADIR}/cassandra -- ${PARAMS} \ >> ${LOGFILE}
+		sleep 3
+		echo "Cassandra started ."
+	else
+		echo "Cassandra already running !!"
+	fi
+}
+
+stop(){
+	if [ ! -f ${PIDFILE} ] ; then
+		echo "Cassandra is ${_BOLD}not${_NORMAL} running"
+	else
+		echo "Cassandra stopping ... "
+		pid_no=`cat ${PIDFILE}`
+		kill $pid_no
+		rm ${PIDFILE}
+		sleep 1
+	fi
+}
+
+status(){
+	if [ ! -f $PIDFILE ] ; then
+		echo "Cassandra is ${_BOLD}not${_NORMAL} running"
+	else
+		echo "Cassandra running. pid : " `cat $PID`
+	fi
+}
+
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	restart)
+		stop
+		start
+		;;
+	status)
+		status
+		;;
+	logclear)
+		log_clear
+		;;
+	*)
+		echo "Usage : sudo service cassandra (start|stop|restart|status|logclear)"
+		;;
+esac
+
+exit 1
