@@ -1,6 +1,6 @@
 #!/bin/bash
 # author : Tarık Yılmaz
-# 2013
+# 2014
 
 
 if [ $(whoami) != "root" ]; then
@@ -47,7 +47,7 @@ stop(){
 		pid_no=`cat ${PIDFILE}`
 		kill $pid_no
 		rm ${PIDFILE}
-		sleep 1
+		sleep 2
 	fi
 }
 
